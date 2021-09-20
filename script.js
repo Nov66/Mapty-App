@@ -26,12 +26,18 @@ if (navigator.geolocation) {
 
       const coords = [latitude, longitude];
 
-      map = L.map('map').setView(coords, 13);
+      map = L.map('map').setView(coords, 14);
       // console.log(map);
 
-      L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      // L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+      //   attribution:
+      //     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      // }).addTo(map);
+
+      // NOTE: Use Google Maps
+      L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
       }).addTo(map);
 
       /*NOTE: on is coming from Leaflet
@@ -74,9 +80,11 @@ form.addEventListener('submit', function (e) {
       })
     )
     .setPopupContent('Workout')
-    .openPopup();
+    .openPopup()
+    ._icon.classList.add('huechange');
 });
 
+// HIGHLIGHT: Toggle Cadence and Elevation
 inputType.addEventListener('change', function () {
   inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
   inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
