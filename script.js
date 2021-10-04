@@ -9,6 +9,7 @@ const inputElevation = document.querySelector('.form__input--elevation');
 
 class Workout {
   date = new Date();
+  // NOTE: Select workouts using ID
   id = (Date.now() + '').slice(-10);
   // id = String(new Date()).slice(-10);
 
@@ -68,15 +69,19 @@ class Cycling extends Workout {
 // HIGHLIGHT: Application Architecture
 class App {
   #map;
+  #mapZoomLevel = 14;
   #mapEvent;
   #workout = [];
 
   constructor() {
     this._getPosition();
     form.addEventListener('submit', this._newWorkout.bind(this));
-
     // HIGHLIGHT: Toggle Cadence and Elevation
     inputType.addEventListener('change', this._toggleElevationField);
+    /* NOTE: Event Delegation -> add event listener to the Parent Element
+    - Move to Marker on Click
+    */
+    containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
   }
 
   /* HIGHLIGHT: Get Current GeoLocation
@@ -102,7 +107,7 @@ class App {
 
     const coords = [latitude, longitude];
 
-    this.#map = L.map('map').setView(coords, 14);
+    this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
     // console.log(map);
 
     /*L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
@@ -273,6 +278,31 @@ class App {
       `;
 
     form.insertAdjacentHTML('afterend', html);
+  }
+
+  _moveToPopup(e) {
+    const workoutEl = e.target.closest('.workout');
+    console.log(workoutEl);
+
+    if (!workoutEl) return;
+
+    // console.log(this.#workout[0].id);
+
+    const workout = this.#workout.find(
+      work => work.id === workoutEl.dataset.id
+    );
+    console.log(workout);
+
+    /* NOTE: Use setView() method to move to the coordinate location
+    - First argument is Coordinates
+    - Second argument is Zoom Level
+    */
+    this.#map.setView(workout.coords, this.#mapZoomLevel, {
+      animate: true,
+      pan: {
+        duration: 1,
+      },
+    });
   }
 }
 
