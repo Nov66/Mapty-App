@@ -74,7 +74,13 @@ class App {
   #workout = [];
 
   constructor() {
+    // NOTE: Get User's position
     this._getPosition();
+
+    // NOTE: Get Data from LocalStorage
+    this._getLocalStorage();
+
+    // NOTE: Attach event handler
     form.addEventListener('submit', this._newWorkout.bind(this));
     // HIGHLIGHT: Toggle Cadence and Elevation
     inputType.addEventListener('change', this._toggleElevationField);
@@ -126,6 +132,12 @@ class App {
   - HIGHLIGHT: Handle Clicks on Map
   */
     this.#map.on('click', this._showForm.bind(this));
+
+    /* NOTE: Call this method here because map has not loaded when getting localStorage
+     */
+    this.#workout.forEach(work => {
+      this._renderWorkoutMarker(work);
+    });
   }
 
   _showForm(mapE) {
@@ -170,7 +182,7 @@ class App {
     // NOTE: If workout is Running, create Running Object
     if (type === 'running') {
       const cadence = +inputCadence.value;
-      // NOTE: Check if data is valid
+      // HIGHLIGHT: Check if data is valid
       if (
         /* !Number.isFinite(distance) ||
           !Number.isFinite(duration) ||
@@ -210,6 +222,9 @@ class App {
     // NOTE: Hide form + clear input fields
     // HIGHLIGHT: Clear Input Fields
     this._hideForm();
+
+    // NOTE: Set local storage to all workouts
+    this._setLocalStorage();
   }
 
   _renderWorkoutMarker(workout) {
@@ -304,6 +319,34 @@ class App {
       },
     });
   }
-}
 
+  /* NOTE: LocalStorage -> Only use for small amounts of data -> because it is Blocking
+    - First, Give it a name -> 'workouts'
+    - Second argument need to be a String that we want to store, and associated with key('workouts')
+    - localStorage -> is a simple key value store -> we need a KEY and Simple Value
+    - Can convert Object to String -> JSON.stringify()
+    - getItem -> convert String back to Object -> JSON.parse()
+    */
+  _setLocalStorage() {
+    localStorage.setItem('workouts', JSON.stringify(this.#workout));
+  }
+
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem('workouts'));
+    console.log(data);
+
+    // NOTE: Check if there is any data in the LocalStorage
+    if (!data) return;
+
+    this.#workout = data;
+    this.#workout.forEach(work => {
+      this._renderWorkout(work);
+    });
+  }
+
+  reset() {
+    localStorage.removeItem('workouts');
+    location.reload();
+  }
+}
 const app = new App();
